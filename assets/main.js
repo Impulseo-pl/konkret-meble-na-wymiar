@@ -734,6 +734,57 @@
     // po sekundzie i tak odsłaniamy treść — nikt nigdy nie zobaczy pustego hero.
     setTimeout(function () { bm.classList.add('bm-in'); }, 1000);
   });
+
+  /* ---------- 4) ZNAK FIRMOWY NA ŚRODKU HERO (prośba Szymona 21.08.2026) ----------
+     Wzorzec z dema Meble FRONT. Trzy zadania: (a) na czas zasłony podnieść znak
+     dokładnie na środek OKNA, (b) puścić go na jego miejsce w hero, gdy zasłona
+     schodzi, (c) pokazać nazwę w lewym górnym rogu dopiero wtedy, gdy duży znak
+     zniknie z ekranu - inaczej ta sama marka wisi dwa razy naraz. */
+  safe('znak-hero', function () {
+    var mark = document.querySelector('.hero-mark');
+    if (!mark) return;
+    var h = document.documentElement;
+
+    if (h.classList.contains('intro-on') && !reduce) {
+      /* Ile brakuje znakowi do środka okna. Mierzymy pozycję DOCELOWĄ, więc na
+         jedną klatkę zdejmujemy przesunięcie - inaczej mierzylibyśmy stan już
+         przesunięty. */
+      mark.classList.add('mierze');
+      var r = mark.getBoundingClientRect();
+      mark.classList.remove('mierze');
+      var dy = Math.round(window.innerHeight / 2 - (r.top + r.height / 2));
+      mark.style.setProperty('--intro-dy', dy + 'px');
+
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { mark.classList.add('mark-wszedl'); });
+      });
+      /* Bezpiecznik: gdyby klatki nie doszły (karta w tle), znak i tak się pokaże. */
+      setTimeout(function () { mark.classList.add('mark-wszedl'); }, 900);
+    }
+
+    /* Nazwa w rogu wchodzi, gdy duży znak wyjedzie za górną krawędź. Bez
+       obserwatora (stara przeglądarka) zostaje widoczna - lepiej za dużo marki
+       niż za mało. */
+    /* Bezpiecznik nadrzędny nad obserwatorem: nazwa w rogu NIE MOŻE zniknąć na
+       stałe. Liczymy pozycję znaku wprost przy przewijaniu - gdyby obserwator
+       nie odpalił (uśpiona karta, stara przeglądarka), nazwa i tak wróci. */
+    function przelicz() {
+      var r = mark.getBoundingClientRect();
+      document.body.classList.toggle('znak-poza-ekranem', r.bottom <= 0 || r.top >= window.innerHeight);
+    }
+    window.addEventListener('scroll', przelicz, { passive: true });
+    window.addEventListener('resize', przelicz, { passive: true });
+    document.addEventListener('visibilitychange', przelicz);
+    przelicz();
+
+    if (!('IntersectionObserver' in window)) return;
+    var ioZnak = new IntersectionObserver(function (wpisy) {
+      wpisy.forEach(function (e) {
+        document.body.classList.toggle('znak-poza-ekranem', !e.isIntersecting);
+      });
+    }, { threshold: 0 });
+    ioZnak.observe(mark);
+  });
 })();
 
 

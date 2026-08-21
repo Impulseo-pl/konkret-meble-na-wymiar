@@ -21,43 +21,42 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=04e43151">
-</head>
-<body>
-
-<!-- WEJSCIE NA STRONE - kurtyna z nazwa firmy. Gra raz na wizytę (sessionStorage),
-     ?intro w adresie = zagraj ponownie. Skrypt tuż pod znacznikiem, bez defer. -->
-<div class="intro" id="intro" aria-hidden="true">
-  <div class="intro-in">
-    <div class="intro-name">KONKRET</div>
-    <div class="intro-sub">MEBLE NA WYMIAR &middot; KOŁO</div>
-    <div class="intro-bar"><i></i></div>
-  </div>
-</div>
+<link rel="stylesheet" href="assets/styles.css?v=4d881626">
 <script>
+/* WEJSCIE NA STRONE (prosba Szymona 21.08.2026, wzor: demo Meble FRONT).
+   Skrypt siedzi w <head> BEZ defer, zeby strona nie mignela przed zaslona.
+   Zaslona w CSS jest domyslnie wylaczona (display:none) - wlacza ja dopiero ta
+   klasa, wiec przy wylaczonym JS wejscia po prostu nie ma i nic nie blokuje.
+   Gra RAZ na wizyte (sessionStorage); ?intro w adresie = zagraj ponownie. */
 (function(){
-  var el=document.getElementById('intro');
-  if(!el)return;
-  var znika=function(){ if(el.parentNode) el.parentNode.removeChild(el); };
-  var powtorz=/[?&]intro(=|&|$)/.test(location.search);
-  var mniejRuchu=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var bylo=false; try{ bylo=sessionStorage.getItem('intro-konkret')==='1'; }catch(e){}
-  if(mniejRuchu||(bylo&&!powtorz)){ znika(); return; }
-  try{ sessionStorage.setItem('intro-konkret','1'); }catch(e){}
-  el.classList.add('on');
-  var zrobione=false;
-  function schowaj(){
-    if(zrobione)return; zrobione=true;
-    el.classList.add('gone');
-    setTimeout(znika,700);
-  }
-  setTimeout(schowaj,1050);              /* właściwe wejście: ~1 s */
-  setTimeout(schowaj,2200);              /* twardy bezpiecznik */
-  ['click','touchstart','wheel','keydown','scroll'].forEach(function(ev){
-    window.addEventListener(ev,schowaj,{passive:true,once:true});
-  });
+  try{
+    var h = document.documentElement;
+    h.classList.add('js-on');   /* bez skryptu nazwa w rogu ma zostac widoczna */
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    var znowu = location.search.indexOf('intro') > -1;
+    if (!znowu && sessionStorage.getItem('konkret-intro')) return;
+    sessionStorage.setItem('konkret-intro','1');
+    h.classList.add('intro-on');
+    var zdjete = false;
+    function koniec(){
+      if (zdjete) return; zdjete = true;
+      h.classList.add('intro-out');
+      try { document.dispatchEvent(new CustomEvent('intro:end')); } catch(e){}
+      setTimeout(function(){ h.classList.remove('intro-on','intro-out'); }, 800);
+    }
+    setTimeout(koniec, 1900);
+    /* twardy bezpiecznik: cokolwiek by nie padlo, po 3,8 s zaslony nie ma */
+    setTimeout(function(){ h.classList.remove('intro-on','intro-out'); }, 3800);
+    document.addEventListener('click', koniec);
+    window.addEventListener('wheel', koniec, {passive:true});
+    window.addEventListener('touchstart', koniec, {passive:true});
+    window.addEventListener('keydown', koniec);
+  }catch(e){}
 })();
 </script>
+</head>
+<body class="ma-znak-w-hero">
+<div id="intro" aria-hidden="true"></div>
 
 <header class="nav">
   <div class="wrap nav-inner">
@@ -75,18 +74,24 @@
 </header>
 
 <main>
-<section class="hero-cine">
+<section class="hero-cine hero-srodek">
   <img src="img/hero.jpg" fetchpriority="high" alt="KONKRET Meble na wymiar - Meble na wymiar w Kole. Od pomiaru po montaż. " width="1880" height="1253">
   <div class="wrap">
     <div class="hero-copy">
-      <div class="brandmark bm-s"><span class="bm-line"><span>KONKRET Meble na wymiar</span></span></div>
+      <!-- Znak firmowy: na czas zaslony stoi na srodku okna (ciemny, na jasnym tle),
+           przy jej zdejmowaniu zjezdza na swoje miejsce w hero i w locie przechodzi
+           na biel. Firma nie ma znaku graficznego, wiec znakiem jest sama nazwa. -->
+      <div class="hero-mark">
+        <span class="mark-nazwa">KONKRET</span>
+        <span class="mark-pod">MEBLE NA WYMIAR &middot; KOŁO</span>
+      </div>
       <h1>Meble na wymiar w Kole. Od pomiaru po montaż. </h1>
       <p class="lead">Najpierw pomiar i projekt, decyzja potem. Mebel powstaje pod Twoje wnętrze - ze skosem i krzywą ścianą włącznie.</p>
       <div class="hero-actions">
         <a href="realizacje.html" class="btn btn-accent">Zobacz realizacje <span class="arr">→</span></a>
         <a href="kontakt.html" class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.45)">Zapytaj o wycenę</a>
       </div>
-      <div style="margin-top:var(--space-6);color:#fff;font-weight:600;letter-spacing:.02em;opacity:.92"><svg class="ico-star" width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-2px" aria-hidden="true"><path d="M12 2.8l2.85 5.8 6.4.93-4.63 4.5 1.1 6.37L12 17.4l-5.72 3 1.1-6.37-4.63-4.5 6.4-.93L12 2.8Z" fill="currentColor"/></svg> Ocena 4,3 w Google · 8 opinii</div>
+      <div class="hero-ocena"><svg class="ico-star" width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-2px" aria-hidden="true"><path d="M12 2.8l2.85 5.8 6.4.93-4.63 4.5 1.1 6.37L12 17.4l-5.72 3 1.1-6.37-4.63-4.5 6.4-.93L12 2.8Z" fill="currentColor"/></svg> Ocena 4,3 w Google · 8 opinii</div>
     </div>
   </div>
 </section>
@@ -214,6 +219,6 @@
 <div class="sticky-reserve"><a class="sr-book" href="kontakt.html">Zapytaj o wycenę</a><a class="sr-call" href="tel:+48605624627" aria-label="Zadzwoń"><svg class="ico-tel" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11.4 11.4 0 0 0 3.6.58 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.46.58 3.6a1 1 0 0 1-.25 1l-2.23 2.2Z" fill="currentColor"/></svg></a></div>
 <div class="demo-wazne" data-do="2026-08-19" data-cykl="3" hidden><svg class="dw-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.6" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.2V12l3.3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="dw-txt"></span></div>
 
-<script src="assets/main.js"></script>
+<script src="assets/main.js?v=80b8f74f"></script>
 </body>
 </html>
