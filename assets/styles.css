@@ -1427,3 +1427,41 @@ footer{view-transition-name:mt-foot}
 
 /* === szary tekst dociągnięty do czytelności (WCAG 4.5 na wszystkich tłach) === */
 :root{--muted:#666769;}
+
+/* ============================================================
+   WEJŚCIE NA STRONĘ — kurtyna z nazwą (prośba Szymona 21.08.2026,
+   wzór: demo Vente Meble). Tylko strona główna, raz na wizytę.
+   Poniżej 1,2 s — dłuższe czyta się jak zacięcie strony.
+   ============================================================ */
+.intro{
+  display:none;                      /* włącza dopiero skrypt — bez skryptu nic nie zasłania */
+  position:fixed;inset:0;z-index:9999;
+  background:var(--ink);
+  align-items:center;justify-content:center;
+  transition:opacity .5s cubic-bezier(.22,.61,.36,1),visibility .5s;
+}
+.intro.on{display:flex}
+.intro.gone{opacity:0;visibility:hidden;pointer-events:none}
+.intro-in{text-align:center;color:#fff;padding:0 24px}
+.intro-name{
+  font-family:'Lora',Georgia,serif;font-weight:600;
+  font-size:clamp(2.3rem,8vw,4.8rem);line-height:1;
+  letter-spacing:.2em;text-indent:.2em;                 /* text-indent równoważy odstęp po ostatniej literze */
+  opacity:0;transform:translateY(12px);
+  animation:introIn .55s cubic-bezier(.22,.61,.36,1) forwards;
+}
+.intro-sub{
+  margin-top:14px;
+  font-size:clamp(.64rem,1.7vw,.76rem);font-weight:600;
+  letter-spacing:.4em;text-indent:.4em;color:#9AA8CE;
+  opacity:0;animation:introIn .55s cubic-bezier(.22,.61,.36,1) .16s forwards;
+}
+.intro-bar{width:120px;height:1px;background:rgba(255,255,255,.2);margin:26px auto 0;overflow:hidden}
+.intro-bar i{
+  display:block;height:100%;width:100%;background:#9AA8CE;
+  transform:translateX(-100%);
+  animation:introLoad .95s cubic-bezier(.4,.1,.2,1) .06s forwards;
+}
+@keyframes introIn{to{opacity:1;transform:none}}
+@keyframes introLoad{to{transform:translateX(0)}}
+@media (prefers-reduced-motion:reduce){.intro{display:none!important}}

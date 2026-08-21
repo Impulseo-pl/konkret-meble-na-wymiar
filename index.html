@@ -21,9 +21,43 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=09ca39fa">
+<link rel="stylesheet" href="assets/styles.css?v=04e43151">
 </head>
 <body>
+
+<!-- WEJSCIE NA STRONE - kurtyna z nazwa firmy. Gra raz na wizytę (sessionStorage),
+     ?intro w adresie = zagraj ponownie. Skrypt tuż pod znacznikiem, bez defer. -->
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-in">
+    <div class="intro-name">KONKRET</div>
+    <div class="intro-sub">MEBLE NA WYMIAR &middot; KOŁO</div>
+    <div class="intro-bar"><i></i></div>
+  </div>
+</div>
+<script>
+(function(){
+  var el=document.getElementById('intro');
+  if(!el)return;
+  var znika=function(){ if(el.parentNode) el.parentNode.removeChild(el); };
+  var powtorz=/[?&]intro(=|&|$)/.test(location.search);
+  var mniejRuchu=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var bylo=false; try{ bylo=sessionStorage.getItem('intro-konkret')==='1'; }catch(e){}
+  if(mniejRuchu||(bylo&&!powtorz)){ znika(); return; }
+  try{ sessionStorage.setItem('intro-konkret','1'); }catch(e){}
+  el.classList.add('on');
+  var zrobione=false;
+  function schowaj(){
+    if(zrobione)return; zrobione=true;
+    el.classList.add('gone');
+    setTimeout(znika,700);
+  }
+  setTimeout(schowaj,1050);              /* właściwe wejście: ~1 s */
+  setTimeout(schowaj,2200);              /* twardy bezpiecznik */
+  ['click','touchstart','wheel','keydown','scroll'].forEach(function(ev){
+    window.addEventListener(ev,schowaj,{passive:true,once:true});
+  });
+})();
+</script>
 
 <header class="nav">
   <div class="wrap nav-inner">
